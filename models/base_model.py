@@ -5,8 +5,9 @@ from torchmetrics import Accuracy, F1Score
 
 
 class ImageClassifier(pl.LightningModule):
-    def __init__(self, num_classes: int):
+    def __init__(self, model, num_classes: int):
         super().__init__()
+        self.model = model
         self.num_classes = num_classes
         if self.num_classes == 2:
             self.train_acc = Accuracy(task="binary")
@@ -14,7 +15,7 @@ class ImageClassifier(pl.LightningModule):
             self.train_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
 
     def forward(self, x):
-        return x
+        return self.model(x)
 
     def training_step(self, batch):
         x, y = batch

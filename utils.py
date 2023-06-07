@@ -1,4 +1,5 @@
 from sklearn.preprocessing import LabelEncoder
+from models.mlp_mixer import MlpMixer
 
 
 def convert_category_to_label(categories: list) -> list:

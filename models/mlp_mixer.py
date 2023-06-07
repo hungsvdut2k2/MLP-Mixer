@@ -16,22 +16,24 @@ class Patches(nn.Module):
 
 
 class MixerBlock(nn.Module):
-    def __init__(self, s: int, c: int, ds: int, dc: int, activation=nn.GELU()):
+    def __init__(
+        self, s: int, c: int, ds: int, dc: int, activation=nn.GELU(), device="cuda"
+    ):
         super().__init__()
         self.layer_norm = nn.LayerNorm(normalized_shape=(128, 1024))
         self.activation_layer = activation
         self.weight1 = torch.nn.Parameter(
             torch.nn.init.kaiming_uniform_(torch.empty(s, ds))
-        )
+        ).to(device)
         self.weight2 = torch.nn.Parameter(
             torch.nn.init.kaiming_uniform_(torch.empty(ds, s))
-        )
+        ).to(device)
         self.weight3 = torch.nn.Parameter(
             torch.nn.init.kaiming_uniform_(torch.empty(c, dc))
-        )
+        ).to(device)
         self.weight4 = torch.nn.Parameter(
             torch.nn.init.kaiming_uniform_(torch.empty(dc, c))
-        )
+        ).to(device)
 
     def forward(self, x):
         # token-mixing layer
@@ -62,14 +64,16 @@ class MlpMixer(nn.Module):
         num_mlp_blocks: int,
         num_classes: int,
     ):
+        self.c = c
+        self.s = s
+        self.ds = ds
+        self.dc = dc
         super().__init__()
         self.num_classes = num_classes
         super().__init__()
         self.mixer_blocks = [MixerBlock(s, c, ds, dc) for i in range(num_mlp_blocks)]
         self.num_classes = num_classes
-        self.classifier = nn.Sequential(
-            nn.Flatten(), nn.Dropout(0.2), nn.Linear(c * s, num_classes), nn.Softmax()
-        )
+        self.classifier = nn.Sequential(nn.Flatten(), nn.Dropout(0.2))
         self.patches_extract = Patches(patch_size)
 
     def forward(self, x):
@@ -77,4 +81,10 @@ class MlpMixer(nn.Module):
         for block in self.mixer_blocks:
             patches = block(patches)
         output = self.classifier(patches)
+        if self.num_classes == 2:
+            output = nn.Linear(self.c * self.s, 1)(output)
+            output = nn.Sigmoid()(output)
+        else:
+            output = nn.Linear(self.c * self.s, self.num_classes)(output)
+            output = nn.Softmax()(output)
         return output
