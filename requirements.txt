@@ -2,3 +2,4 @@ pytorch-lightning
 torchaudio
 torchvision
 scikit-learn
+matplotlib
