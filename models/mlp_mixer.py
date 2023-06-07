@@ -16,12 +16,9 @@ class Patches(nn.Module):
 
 
 class MixerBlock(nn.Module):
-    def __init__(
-        self, s: int, c: int, ds: int, dc: int, activation=nn.GELU(), drop_out=0.2
-    ):
+    def __init__(self, s: int, c: int, ds: int, dc: int, activation=nn.GELU()):
         super().__init__()
         self.layer_norm = nn.LayerNorm(normalized_shape=(128, 1024))
-        self.drop_out = nn.Dropout(drop_out)
         self.activation_layer = activation
         self.weight1 = torch.nn.Parameter(
             torch.nn.init.kaiming_uniform_(torch.empty(s, ds))
@@ -55,8 +52,29 @@ class MixerBlock(nn.Module):
 
 
 class MlpMixer(nn.Module):
-    def __init__(self):
+    def __init__(
+        self,
+        patch_size: int,
+        s: int,
+        c: int,
+        ds: int,
+        dc: int,
+        num_mlp_blocks: int,
+        num_classes: int,
+    ):
         super().__init__()
+        self.num_classes = num_classes
+        super().__init__()
+        self.mixer_blocks = [MixerBlock(s, c, ds, dc) for i in range(num_mlp_blocks)]
+        self.num_classes = num_classes
+        self.classifier = nn.Sequential(
+            nn.Flatten(), nn.Dropout(0.2), nn.Linear(c * s, num_classes), nn.Softmax()
+        )
+        self.patches_extract = Patches(patch_size)
 
-    def forward(self):
-        return
+    def forward(self, x):
+        patches = self.patches_extract(x)
+        for block in self.mixer_blocks:
+            patches = block(patches)
+        output = self.classifier(patches)
+        return output
