@@ -23,7 +23,7 @@ def calculate_mean_and_std(data_dir: str):
     return mean, std
 
 
-def build_transforms(data_dir: str):
+def build_transforms(data_dir: str) -> transforms:
     means, stds = calculate_mean_and_std(data_dir)
     data_transforms = transforms.Compose(
         [
@@ -39,7 +39,7 @@ def build_transforms(data_dir: str):
     return data_transforms
 
 
-def build_dataloader(data_dir: str, batch_size: int):
+def build_dataloader(data_dir: str, batch_size: int) -> DataLoader:
     data_transforms = build_transforms(data_dir)
     image_dataset = ImageDataset(data_dir=data_dir, transform=data_transforms)
     image_dataloader = DataLoader(image_dataset, batch_size=batch_size, shuffle=True)

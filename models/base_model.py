@@ -5,7 +5,7 @@ from torchmetrics import Accuracy, F1Score
 
 
 class ImageClassifier(pl.LightningModule):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes: int):
         super().__init__()
         self.num_classes = num_classes
         if self.num_classes == 2:
