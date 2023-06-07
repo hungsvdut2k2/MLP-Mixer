@@ -23,16 +23,16 @@ class MixerBlock(nn.Module):
         self.layer_norm = nn.LayerNorm(normalized_shape=(128, 1024))
         self.activation_layer = activation
         self.weight1 = torch.nn.Parameter(
-            torch.nn.init.kaiming_uniform_(torch.empty(s, ds))
+            torch.nn.init.kaiming_uniform_(torch.empty(s, ds)), requires_grad=True
         ).to(device)
         self.weight2 = torch.nn.Parameter(
-            torch.nn.init.kaiming_uniform_(torch.empty(ds, s))
+            torch.nn.init.kaiming_uniform_(torch.empty(ds, s)), requires_grad=True
         ).to(device)
         self.weight3 = torch.nn.Parameter(
-            torch.nn.init.kaiming_uniform_(torch.empty(c, dc))
+            torch.nn.init.kaiming_uniform_(torch.empty(c, dc)), requires_grad=True
         ).to(device)
         self.weight4 = torch.nn.Parameter(
-            torch.nn.init.kaiming_uniform_(torch.empty(dc, c))
+            torch.nn.init.kaiming_uniform_(torch.empty(dc, c)), requires_grad=True
         ).to(device)
 
     def forward(self, x):
