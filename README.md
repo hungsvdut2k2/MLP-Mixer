@@ -48,5 +48,5 @@ validation/
 ```
 ## Train your model by running this command line 
 ```bash
-$python train.py --epochs ${epochs} --num-classes ${num_classes}
+$ python train.py --epochs ${epochs} --num-classes ${num_classes}
 ```
