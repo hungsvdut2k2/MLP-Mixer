@@ -20,11 +20,12 @@ def train(
     num_mlp_blocks: int,
     epochs: int,
 ):
+    print("----------------Build Dataset------------------------")
     train_dataloader = build_dataloader(train_data_dir, batch_size)
     valid_dataloader = build_dataloader(valid_data_dir, batch_size)
-
+    print("----------------Finish Build Dataset-----------------")
     model = MlpMixer(patch_size, s, c, ds, dc, num_mlp_blocks, epochs)
-    base_model = ImageClassifier(model, num_classes)
+    base_model = ImageClassifier(num_classes)
     logger = CSVLogger("logs", name="cat_dog_classfication")
     trainer = pl.Trainer(max_epochs=epochs, logger=logger)
     trainer.fit(base_model, train_dataloader, valid_dataloader)
@@ -51,7 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("--s", default=196, type=int)
     parser.add_argument("--c", default=768, type=int, help="Projection units")
     parser.add_argument("--patch-size", default=16, type=int)
-    parser.add_argument("--num-of-mlp-blocks", default=8, type=int)
+    parser.add_argument("--num-mlp-blocks", default=8, type=int)
 
     args = parser.parse_args()
 

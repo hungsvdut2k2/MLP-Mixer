@@ -18,7 +18,6 @@ class Patches(nn.Module):
 class MixerBlock(nn.Module):
     def __init__(self, s: int, c: int, ds: int, dc: int, activation=nn.GELU()):
         super().__init__()
-        self.layer_norm = nn.LayerNorm(normalized_shape=(128, 1024))
         self.activation_layer = activation
         self.weight1 = torch.nn.Parameter(
             torch.nn.init.kaiming_uniform_(torch.empty(s, ds)), requires_grad=True
@@ -46,6 +45,7 @@ class MixerBlock(nn.Module):
         w3_x = u @ self.weight3
         w4_x = w3_x @ self.weight4
         w4_x = self.activation_layer(w4_x)
+        # skip-connection
         y = w4_x + u
 
         return y
@@ -62,13 +62,13 @@ class MlpMixer(nn.Module):
         num_mlp_blocks: int,
         num_classes: int,
     ):
+        super().__init__()
         self.c = c
         self.s = s
         self.ds = ds
         self.dc = dc
-        super().__init__()
         self.num_classes = num_classes
-        super().__init__()
+        self.layer_norm = nn.LayerNorm([1, s, c])
         self.mixer_blocks = nn.ModuleList(
             [MixerBlock(s, c, ds, dc) for i in range(num_mlp_blocks)]
         )
@@ -79,6 +79,7 @@ class MlpMixer(nn.Module):
     def forward(self, x):
         patches = self.patches_extract(x)
         for block in self.mixer_blocks:
+            patches = self.layer_norm(patches)
             patches = block(patches)
         output = self.classifier(patches)
         if self.num_classes == 2:
