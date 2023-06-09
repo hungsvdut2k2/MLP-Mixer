@@ -47,6 +47,6 @@ validation/
 ......c_image_2.jpg
 ```
 ## Train your model by running this command line 
-```$bash
-python train.py --epochs ${epochs} --num-classes ${num_classes}
+```bash
+$python train.py --epochs ${epochs} --num-classes ${num_classes}
 ```
